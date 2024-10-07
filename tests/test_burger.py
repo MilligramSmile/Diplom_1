@@ -2,6 +2,7 @@ import allure
 import pytest
 
 from unittest.mock import Mock
+from unittest.mock import MagicMock
 
 
 class TestBurger:
@@ -61,8 +62,28 @@ class TestBurger:
 
     @allure.title('Тест на получение рецепта гамбургера')
     def test_get_receipt(self, burger, mock_set_buns, mock_add_ingredients_filling, mock_add_ingredients_sauce):
+        mock_set_buns = MagicMock()
+        mock_set_buns.get_name.return_value = "Булочка с приветом"
+
+        mock_add_ingredients_filling = MagicMock()
+        mock_add_ingredients_filling.get_type.return_value = "filling"
+        mock_add_ingredients_filling.get_name.return_value = "Адская Креветка"
+
+        mock_add_ingredients_sauce = MagicMock()
+        mock_add_ingredients_sauce.get_type.return_value = "sauce"
+        mock_add_ingredients_sauce.get_name.return_value = "Соевый соус, простой соевый соус"
+
         burger.set_buns(mock_set_buns)
         burger.add_ingredient(mock_add_ingredients_filling)
         burger.add_ingredient(mock_add_ingredients_sauce)
+
+        expected_receipt = (
+            "(==== Булочка с приветом ====)\n"
+            "= filling Адская Креветка =\n"
+            "= sauce Соевый соус, простой соевый соус =\n"
+            "(==== Булочка с приветом ====)\n\n"
+
+        )
+
         receipt = burger.get_receipt()
-        assert burger.get_receipt() == receipt
+        assert receipt.strip().startswith(expected_receipt.strip())
